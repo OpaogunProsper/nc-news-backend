@@ -1,9 +1,12 @@
 # Northcoders News API
 
-For instructions, please head over to [L2C NC News](https://l2c.northcoders.com/courses/be/nc-news).
+## Environment Variables
 
+1. Create two `.env` files in the project root folder: `.env.test` and `.env.development`. 
 
+2. Add the following line to each file, replacing "your_database_name" with the correct database name:
 
---- 
+    PGDATABASE=your_database_name
 
-This portfolio project was created as part of a Digital Skills Bootcamp in Software Engineering provided by [Northcoders](https://northcoders.com/)
+3. Ensure that these files are added to your `.gitignore` file to avoid committing sensitive and private information.
+
