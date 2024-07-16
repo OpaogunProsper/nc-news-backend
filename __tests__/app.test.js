@@ -4,6 +4,7 @@ const seed = require("../db/seeds/seed");
 const data = require("../db/data/test-data/index");
 const db = require("../db/connection");
 const endpointsData = require("../endpoints.json");
+const comments = require("../db/data/test-data/comments");
 
 beforeEach(() => seed(data));
 afterAll(() => db.end());
@@ -84,6 +85,61 @@ describe("express server", () => {
         .expect(400)
         .then(({ body }) => {
           expect(body.message).toBe("bad request");
+        });
+    });
+  });
+  describe("/api/articles", () => {
+    it("GET 200: Responds with all the articles", () => {
+      return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          articles.forEach((article) => {
+            expect(article).not.toHaveProperty("body");
+            expect(article).toMatchObject({
+              author: expect.any(String),
+              title: expect.any(String),
+              article_id: expect.any(Number),
+              topic: expect.any(String),
+              created_at: expect.any(String),
+              votes: expect.any(Number),
+              article_img_url: expect.any(String),
+              comment_count: expect.any(String),
+            });
+          });
+        });
+    });
+
+    it("GET 200: Responds with the number of comments referencing article_id", () => {
+      const countObj = {};
+      comments.forEach((comment) => {
+        let { article_id } = comment;
+        countObj[article_id] = countObj[article_id]
+          ? countObj[article_id] + 1
+          : 1;
+      });
+      return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          articles.forEach((article) => {
+            if (article.comment_count != "0") {
+              expect(article.comment_count).toBe(
+                countObj[article.article_id].toString()
+              );
+            }
+          });
+        });
+    });
+
+    it("GET 200: Responds with ordered articles by dates in descending order", () => {
+      return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.articles).toBeSortedBy("created_at", {
+            descending: true,
+          });
         });
     });
   });
