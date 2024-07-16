@@ -47,4 +47,44 @@ describe("express server", () => {
         });
     });
   });
+
+  describe("/api/articles/:article_id", () => {
+    it("GET 200: Responds with an article object having author, title, article_id, body, topic, created_at, votes and article_img_url as properties", () => {
+      return request(app)
+        .get("/api/articles/1")
+        .expect(200)
+        .then(({ body }) => {
+          const { article } = body;
+          expect(article).toEqual({
+            article_id: 1,
+            title: "Living in the shadow of a great man",
+            topic: "mitch",
+            author: "butter_bridge",
+            body: "I find this existence challenging",
+            created_at: "2020-07-09T20:11:00.000Z",
+            votes: 100,
+            article_img_url:
+              "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+          });
+        });
+    });
+  });
+  describe("err-handling tests for article id", () => {
+    it("GET 404: Responds with appropriate status and  error message when given a valid but non-existent id", () => {
+      return request(app)
+        .get("/api/articles/922")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.message).toBe("article not found");
+        });
+    });
+    it("GET 400: Responds with appropriate status and error message when the wrong data type is inputted as the article id", () => {
+      return request(app)
+        .get("/api/articles/not-a-number")
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.message).toBe("bad request");
+        });
+    });
+  });
 });
