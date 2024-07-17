@@ -173,5 +173,66 @@ describe("express server", () => {
           });
       });
     });
+    describe("POST/api/articles/:article_id/comments ", () => {
+      it("POST 201: Inserts a new comment and responds with the posted object", () => {
+        const reqBody = {
+          body: "This is some kinda test comment, so vote for me",
+          username: "butter_bridge",
+        };
+
+        return request(app)
+          .post("/api/articles/11/comments")
+          .send(reqBody)
+          .expect(201)
+          .then(({ body }) => {
+            const { result } = body;
+
+            expect(result.body).toBe(reqBody.body);
+            expect(result.author).toBe(reqBody.username);
+            expect(result.votes).toBe(0);
+            expect(result.article_id).toBe(11);
+            expect(typeof result.comment_id).toBe("number");
+            expect(typeof result.created_at).toBe("string");
+          });
+      });
+      it("POST 400: Responds with appropriate status and error message when given invalid id data-type", () => {
+        return request(app)
+          .post("/api/articles/not-a-number/comments")
+          .send({
+            username: "butter_bridge",
+            body: "Catching up",
+          })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.message).toBe("bad request");
+          });
+      });
+
+      it("POST 404: Responds with appropriate error message and status when a valid article id is given but the article does not exist", () => {
+        return request(app)
+          .post("/api/articles/55/comments")
+          .send({
+            username: "butter_bridge",
+            body: "Catching up",
+          })
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.message).toBe("article not found");
+          });
+      });
+
+      it("POST 404: Responds with appropriate status and error message when username is not referenced", () => {
+        return request(app)
+          .post("/api/articles/10/comments")
+          .send({
+            username: "prblark",
+            body: "Catching up now",
+          })
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.message).toBe("user not found");
+          });
+      });
+    });
   });
 });

@@ -26,3 +26,23 @@ exports.selectCommentsByArticleId = (article_id) => {
     return queryResults.rows;
   });
 };
+exports.addComments = (article_id, req) => {
+  const { username, body} = req
+  return checkArticleExists(article_id)
+    .then((result) => {
+      if (!result) {
+        return Promise.reject({ status: 404, message: "article not found" });
+      }
+
+      return db
+        .query(
+          `INSERT INTO comments (body, author, article_id) VALUES ($1, $2, $3) RETURNING *`,
+          [body, username, article_id]
+        )
+        .then(({ rows }) => {
+       return rows [0]
+        });
+    })
+    
+ 
+};
