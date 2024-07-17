@@ -4,9 +4,15 @@ exports.endpointHandler = (req, res, next) => {
     message: "invalid endpoint",
   });
 };
-exports.thisHandler = (err, req, res, next) => {
+exports.dbErrHandler = (err, req, res, next) => {
   if (err.code === "42703") {
     res.status(400).send({ message: "Bad Request" });
+  }
+  next(err);
+};
+exports.foreignKeyErrHandler = (err, req, res, next) => {
+  if (err.code === "23503") {
+    res.status(404).send({ message: "user not found" });
   }
   next(err);
 };
