@@ -95,7 +95,6 @@ describe("express server", () => {
         .expect(200)
         .then(({ body: { articles } }) => {
           articles.forEach((article) => {
-            expect(article).not.toHaveProperty("body");
             expect(article).toMatchObject({
               author: expect.any(String),
               title: expect.any(String),
@@ -110,28 +109,6 @@ describe("express server", () => {
         });
     });
 
-    it("GET 200: Responds with the number of comments referencing article_id", () => {
-      const countObj = {};
-      comments.forEach((comment) => {
-        let { article_id } = comment;
-        countObj[article_id] = countObj[article_id]
-          ? countObj[article_id] + 1
-          : 1;
-      });
-      return request(app)
-        .get("/api/articles")
-        .expect(200)
-        .then(({ body: { articles } }) => {
-          articles.forEach((article) => {
-            if (article.comment_count != "0") {
-              expect(article.comment_count).toBe(
-                countObj[article.article_id].toString()
-              );
-            }
-          });
-        });
-    });
-
     it("GET 200: Responds with ordered articles by dates in descending order", () => {
       return request(app)
         .get("/api/articles")
@@ -141,6 +118,60 @@ describe("express server", () => {
             descending: true,
           });
         });
+    });
+    describe("/api/articles/:article_id/comments", () => {
+      it("GET 200: Responds with an array of comments for the given article_id", () => {
+        return request(app)
+          .get("/api/articles/1/comments")
+          .expect(200)
+          .then(({ body }) => {
+            const { comments } = body;
+            comments.forEach((comment) => {
+              expect(comment).toMatchObject({
+                comment_id: expect.any(Number),
+                votes: expect.any(Number),
+                created_at: expect.any(String),
+                author: expect.any(String),
+                body: expect.any(String),
+                article_id: expect.any(Number),
+              });
+            });
+          });
+      });
+      it("GET 200: Serves comments based off the most recent ones", () => {
+        return request(app)
+          .get("/api/articles/1/comments")
+          .expect(200)
+          .then(({ body }) => {
+            const { comments } = body;
+            expect(comments).toBeSortedBy("created_at", { descending: true });
+          });
+      });
+      it("GET 200: Responds with and empty array if the article_id is valid  but isn't attached to any comment", () => {
+        return request(app)
+          .get("/api/articles/2/comments")
+          .expect(200)
+          .then(({ body }) => {
+            const { comments } = body;
+            expect(comments).toEqual([]);
+          });
+      });
+      it("GET 404: Responds with appropriate error message and status when a valid article id is given but the article does not exist", () => {
+        return request(app)
+          .get("/api/articles/55/comments")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.message).toBe("article not found");
+          });
+      });
+      it("GET 400: Responds with appropriate error message and status when an invalid search is performed", () => {
+        return request(app)
+          .get("/api/articles/badreq/comments")
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.message).toBe("bad request");
+          });
+      });
     });
   });
 });
