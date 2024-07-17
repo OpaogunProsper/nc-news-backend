@@ -4,6 +4,12 @@ exports.endpointHandler = (req, res, next) => {
     message: "invalid endpoint",
   });
 };
+exports.thisHandler = (err, req, res, next) => {
+  if (err.code === "42703") {
+    res.status(400).send({ message: "Bad Request" });
+  }
+  next(err);
+};
 
 exports.psqlErrHandler = (err, req, res, next) => {
   if (err.code === "22P02") {
