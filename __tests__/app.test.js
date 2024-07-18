@@ -234,5 +234,61 @@ describe("express server", () => {
           });
       });
     });
+    describe("PATCH /api/articles/:article_id ", () => {
+      it("PATCH 200: Updates an article by article_id and responds with the updated article", () => {
+        const reqBody = {
+          inc_votes: 1,
+        };
+        return request(app)
+          .patch("/api/articles/4")
+          .send(reqBody)
+          .expect(200)
+          .then(({ body }) => {
+            const { article } = body;
+            expect(article).toEqual({
+              article_id: 4,
+              title: "Student SUES Mitch!",
+              topic: "mitch",
+              author: "rogersop",
+              body: "We all love Mitch and his wonderful, unique typing style. However, the volume of his typing has ALLEGEDLY burst another students eardrums, and they are now suing for damages",
+              created_at: "2020-05-06T01:14:00.000Z",
+              votes: 1,
+              article_img_url:
+                "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+            });
+          });
+      });
+      it("PATCH 400: Responds with appropriate status and error message when given invalid id data-type", () => {
+        return request(app)
+          .patch("/api/articles/not-a-number")
+          .send({
+            inc_votes: 1,
+          })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.message).toBe("bad request");
+          });
+      });
+      it("PATCH 404: Responds with appropriate error message and status when a valid article id is given but the article does not exist", () => {
+        return request(app)
+          .patch("/api/articles/555")
+          .send({
+            inc_votes: 1,
+          })
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.message).toBe("article not found");
+          });
+      });
+      it("PATCH 400: invalid data type for the inc_votes property", () => {
+        return request(app)
+          .patch("/api/articles/5")
+          .send({ inc_votes: "not-a-number" })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.message).toBe("bad request");
+          });
+      });
+    });
   });
 });
