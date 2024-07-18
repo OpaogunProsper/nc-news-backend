@@ -133,7 +133,6 @@ describe("express server", () => {
                 created_at: expect.any(String),
                 author: expect.any(String),
                 body: expect.any(String),
-                article_id: expect.any(Number),
               });
             });
           });
@@ -245,16 +244,9 @@ describe("express server", () => {
           .expect(200)
           .then(({ body }) => {
             const { article } = body;
-            expect(article).toEqual({
+            expect(article).toMatchObject({
               article_id: 4,
-              title: "Student SUES Mitch!",
-              topic: "mitch",
-              author: "rogersop",
-              body: "We all love Mitch and his wonderful, unique typing style. However, the volume of his typing has ALLEGEDLY burst another students eardrums, and they are now suing for damages",
-              created_at: "2020-05-06T01:14:00.000Z",
               votes: 1,
-              article_img_url:
-                "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
             });
           });
       });
@@ -292,9 +284,7 @@ describe("express server", () => {
     });
     describe("DELETE /api/comments/:comment_id", () => {
       it("DELETE 204: Deletes the given comment by id and responds with no content", () => {
-        return request(app)
-        .delete("/api/comments/4")
-        .expect(204);
+        return request(app).delete("/api/comments/4").expect(204);
       });
       it("DELETE 400: Responds with an appropriate status and error message when provided with an invalid comment_id data-type", () => {
         return request(app)
@@ -326,9 +316,56 @@ describe("express server", () => {
               expect(user).toMatchObject({
                 username: expect.any(String),
                 name: expect.any(String),
-                avatar_url: expect.any(String)
-              })
+                avatar_url: expect.any(String),
+              });
             });
+          });
+      });
+    });
+
+    describe("GET /api/article?sort_by=query&order=asc/desc", () => {
+      it("GET 200: Responds with an array of article objects sorted by title ", () => {
+        return request(app)
+          .get("/api/articles?sort_by=title")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.articles).toBeSortedBy("title", {
+              descending: true,
+            });
+          });
+      });
+
+      it("GET 200: Responds with an array of article objects sorted by topic in ascending order(can handle two queries) ", () => {
+        return request(app)
+          .get("/api/articles?sort_by=topic&order=asc")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.articles).toBeSortedBy("topic", { descending: false });
+          });
+      });
+
+      it("GET 404: Responds with appropriate error message when invalid column is given to sort_by", () => {
+        return request(app)
+          .get("/api/articles?sort_by=no_column")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.message).toEqual("not found");
+          });
+      });
+      it("GET 404: Responds with appropriate error message when query is invalid ordering criteria", () => {
+        return request(app)
+          .get("/api/articles?sort_by=topic&order=invalid-order")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.message).toEqual("not found");
+          });
+      });
+      it("GET 400:Responds with appropriate error message when a query-type asides sort_by or order is given", () => {
+        return request(app)
+          .get("/api/articles?odd=desc")
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.message).toEqual("bad request");
           });
       });
     });

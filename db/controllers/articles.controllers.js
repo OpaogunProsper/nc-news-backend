@@ -12,11 +12,15 @@ exports.getArticleById = (req, res, next) => {
     .catch(next);
 };
 exports.getAllArticles = (req, res, next) => {
-  fetchArticles()
+  const{ query }= req
+  const {sort_by, order} = req.query
+  fetchArticles(query, sort_by, order)
     .then((articles) => {
       res.status(200).send({ articles });
     })
-    .catch(next);
+    .catch((err) =>{
+      next(err)
+    });
 };
 exports.patchArticle = (req, res, next) => {
   const { inc_votes } = req.body;
