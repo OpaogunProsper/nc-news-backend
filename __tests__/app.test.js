@@ -234,7 +234,7 @@ describe("express server", () => {
           });
       });
     });
-    describe.only("PATCH /api/articles/:article_id ", () => {
+    describe("PATCH /api/articles/:article_id ", () => {
       it("PATCH 200: Updates an article by article_id and responds with the updated article", () => {
         const reqBody = {
           inc_votes: 1,
