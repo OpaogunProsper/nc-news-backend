@@ -290,5 +290,29 @@ describe("express server", () => {
           });
       });
     });
+    describe("DELETE /api/comments/:comment_id", () => {
+      it("DELETE 204: Deletes the given comment by id and responds with no content", () => {
+        return request(app)
+        .delete("/api/comments/4")
+        .expect(204);
+      });
+      it("DELETE 400: Responds with an appropriate status and error message when provided with an invalid comment_id data-type", () => {
+        return request(app)
+          .delete("/api/comments/not-a-number")
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.message).toBe("bad request");
+          });
+      });
+
+      it("DELETE 404: Responds with an appropriate status and error message when given a valid but non-existent comment_id", () => {
+        return request(app)
+          .delete("/api/comments/99")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.message).toBe("comment not found");
+          });
+      });
+    });
   });
 });
