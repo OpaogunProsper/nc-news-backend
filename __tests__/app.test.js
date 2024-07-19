@@ -66,6 +66,7 @@ describe("express server", () => {
             votes: 100,
             article_img_url:
               "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+              comment_count: 11
           });
         });
     });
@@ -103,7 +104,6 @@ describe("express server", () => {
               created_at: expect.any(String),
               votes: expect.any(Number),
               article_img_url: expect.any(String),
-              comment_count: expect.any(String),
             });
           });
         });
