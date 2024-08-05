@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors")
 const app = express();
 const { getApi } = require("./controllers/api.controllers");
 const {
@@ -21,6 +22,7 @@ const {
   dbErrHandler,
 } = require("./errors/error-handlers");
 const { getUsers } = require("./controllers/users.controller");
+app.use(cors())
 app.use(express.json());
 
 app.get("/api", getApi);
