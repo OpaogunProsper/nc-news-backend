@@ -1,6 +1,6 @@
 # Northcoders News API
 
- ### Project Hosting Link: [ NC News API](https://nc-news-676h.onrender.com)
+ ### Project Hosting Link: [ NC News API](https://nc-news-676h.onrender.com/api)
  
  
 
